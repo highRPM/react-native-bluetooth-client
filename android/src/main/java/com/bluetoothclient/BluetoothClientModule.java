@@ -54,13 +54,13 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private static final String TAG = BluetoothClientModule.class.getSimpleName();
     public static final String NAME = "BluetoothClient";
     public static final int ADVERTISING_TIMED_OUT = 6;
-    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter bluetoothAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private Handler mHandler;
     private Intent enableBtIntent;
     private Runnable timeoutRunnable;
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.MINUTES);
+    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(3, TimeUnit.MINUTES);
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
     HashSet<BluetoothDevice> mBluetoothDevices;
@@ -70,7 +70,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private BluetoothGatt mBluetoothGatt;
     public BluetoothClientModule(ReactApplicationContext reactContext) {
         super(reactContext);
-
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.servicesMap = new HashMap<String, BluetoothGattService>();
     }
 
@@ -129,6 +129,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     @SuppressLint("MissingPermission")
     @ReactMethod
     public void startAdvertising(int timeout, Promise promise) {
+
+        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
             Log.d(TAG, "advertiser not null");
@@ -144,7 +146,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 if (bluetoothAdapter != null) {
                     // 기본 광고 시간 관련해서 기본 값을 10분으로 준다.
                     if (timeout <= 0) {
-                        timeout = 10;
+                        timeout = 3;
                     }
                     TIMEOUT = TimeUnit.MILLISECONDS.convert(timeout, TimeUnit.MINUTES);
                     if (bluetoothAdapter.isMultipleAdvertisementSupported()) {
@@ -178,6 +180,26 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                     } else {
                         promise.reject("Bluetooth BLE not supported.");
 
+                    }
+                }
+            }
+        }else{
+            if (mAdvertiseCallback == null) {
+                bluetoothAdapter.setName(this.name); 
+                AdvertiseSettings settings = buildAdvertiseSettings();
+                AdvertiseData data = buildAdvertiseData();
+                AdvertiseData scanRes = new AdvertiseData.Builder()
+                    .setIncludeDeviceName(true)
+                    .build();
+                mAdvertiseCallback = new SampleAdvertiseCallback();
+
+                if (mBluetoothLeAdvertiser != null) {
+                    Log.d(TAG, settings.toString());
+                    Log.d(TAG, data.toString());
+                    if(mAdvertiseCallback != null){
+                        mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes,mAdvertiseCallback);
+
+                        promise.resolve("Bluetooth BLE Advertising start.");
                     }
                 }
             }
@@ -295,7 +317,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 }
                 mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
                 mAdvertiseCallback = null;
-                mBluetoothLeAdvertiser = null;
+
                 promise.resolve("ok");
             }
         } catch (Exception e) {
@@ -331,8 +353,14 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
                     mBluetoothDevices.add(device);
+                    // TODO 디바이스 연결 관련 이벤트 추가
                     Log.d(TAG, "devices:"+mBluetoothDevices.toString());
+//                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+//                        .emit("onConnectedDevice", device.toString());
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+//                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+//                        .emit("onDisconnectedDevice", device.toString());
+                    // TODO 디바이스 연결 해제 관련 이벤트 추가
                     Log.d(TAG, "devices:"+mBluetoothDevices.toString());
                     mBluetoothDevices.remove(device);
                 }
