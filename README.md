@@ -1,6 +1,6 @@
 # react-native-bluetooth-client
 
-리액트 네이티브 블루투스 클라이언트 모드를 가능하게 해주는 라이브러리
+리액트 네이티브 블루투스 Peripheral 모드를 가능하게 해주는 라이브러리
 
 ## Installation
 
