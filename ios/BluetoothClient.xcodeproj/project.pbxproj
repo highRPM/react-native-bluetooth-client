@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* BluetoothClient.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* BluetoothClient.m */; };
-		F4FF95D7245B92E800C19C63 /*  BluetoothClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  BluetoothClient.swift */; };
+		47EF97EB4D6BB9E7E83360C6 /* Pods_BluetoothClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 991EFF4C31777A14E65ACBB9 /* Pods_BluetoothClient.framework */; };
+		F4FF95D7245B92E800C19C63 /* BluetoothClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* BluetoothClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +25,9 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libBluetoothClient.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBluetoothClient.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		94351CBDDE8DA1CC2DB4723E /* Pods-BluetoothClient.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothClient.debug.xcconfig"; path = "Target Support Files/Pods-BluetoothClient/Pods-BluetoothClient.debug.xcconfig"; sourceTree = "<group>"; };
+		991EFF4C31777A14E65ACBB9 /* Pods_BluetoothClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BluetoothClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F5FC6681E40741729ECD63F /* Pods-BluetoothClient.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothClient.release.xcconfig"; path = "Target Support Files/Pods-BluetoothClient/Pods-BluetoothClient.release.xcconfig"; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* BluetoothClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BluetoothClient.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* BluetoothClient-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BluetoothClient-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* BluetoothClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothClient.swift; sourceTree = "<group>"; };
@@ -35,6 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47EF97EB4D6BB9E7E83360C6 /* Pods_BluetoothClient.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,7 +60,27 @@
 				B3E7B5891CC2AC0600A0062D /* BluetoothClient.m */,
 				F4FF95D5245B92E700C19C63 /* BluetoothClient-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				C0E865CEC6DD4C8AD5D285E2 /* Pods */,
+				CC503E302C14A0CB2A55BF45 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		C0E865CEC6DD4C8AD5D285E2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				94351CBDDE8DA1CC2DB4723E /* Pods-BluetoothClient.debug.xcconfig */,
+				9F5FC6681E40741729ECD63F /* Pods-BluetoothClient.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		CC503E302C14A0CB2A55BF45 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				991EFF4C31777A14E65ACBB9 /* Pods_BluetoothClient.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -66,6 +90,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "BluetoothClient" */;
 			buildPhases = (
+				15E9317430C8B6233F7A3A18 /* [CP] Check Pods Manifest.lock */,
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
 				58B511D91A9E6C8500147676 /* CopyFiles */,
@@ -111,13 +136,37 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		15E9317430C8B6233F7A3A18 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-BluetoothClient-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				F4FF95D7245B92E800C19C63 /* BluetoothClient.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* BluetoothClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +270,7 @@
 		};
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 94351CBDDE8DA1CC2DB4723E /* Pods-BluetoothClient.debug.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -240,6 +290,7 @@
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9F5FC6681E40741729ECD63F /* Pods-BluetoothClient.release.xcconfig */;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

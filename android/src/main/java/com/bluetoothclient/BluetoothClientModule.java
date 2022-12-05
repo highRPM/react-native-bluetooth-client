@@ -66,9 +66,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     HashSet<BluetoothDevice> mBluetoothDevices;
     BluetoothGattServer mGattServer;
     private String sendData ="";
-
+    private String name = "RnBLE";
+    private BluetoothGatt mBluetoothGatt;
     public BluetoothClientModule(ReactApplicationContext reactContext) {
         super(reactContext);
+
         this.servicesMap = new HashMap<String, BluetoothGattService>();
     }
 
@@ -78,6 +80,14 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         return NAME;
     }
 
+    @ReactMethod
+    public void setName(String name){
+        Log.d(TAG, "set name = "+ name);
+        this.name = name;
+//        ReactApplicationContext context = getReactApplicationContext();
+//        Intent enableBtIntent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
+//        context.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT, null);
+    }
 
     // Example method
     // See https://reactnative.dev/docs/native-modules-android
@@ -127,7 +137,9 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
             if (mBluetoothManger != null) {
                 Log.d(TAG, "manager not null");
+                Log.d(TAG, this.name);
                 bluetoothAdapter = mBluetoothManger.getAdapter();
+                bluetoothAdapter.setName(this.name);
 
                 if (bluetoothAdapter != null) {
                     // 기본 광고 시간 관련해서 기본 값을 10분으로 준다.
@@ -135,14 +147,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                         timeout = 10;
                     }
                     TIMEOUT = TimeUnit.MILLISECONDS.convert(timeout, TimeUnit.MINUTES);
-
                     if (bluetoothAdapter.isMultipleAdvertisementSupported()) {
                         //여기에 광고 시작 코드를 넣는다.
-
                         mBluetoothDevices = new HashSet<>();
                         mGattServer = mBluetoothManger.openGattServer(getReactApplicationContext(), mGattServerCallback);
                         for (BluetoothGattService service : this.servicesMap.values()) {
-
                             mGattServer.addService(service);
                         }
                         mBluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
@@ -150,12 +159,19 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                         if (mAdvertiseCallback == null) {
                             AdvertiseSettings settings = buildAdvertiseSettings();
                             AdvertiseData data = buildAdvertiseData();
+                            AdvertiseData scanRes = new AdvertiseData.Builder()
+                                .setIncludeDeviceName(true)
+                                .build();
                             mAdvertiseCallback = new SampleAdvertiseCallback();
 
                             if (mBluetoothLeAdvertiser != null) {
+                                Log.d(TAG, settings.toString());
+                                Log.d(TAG, data.toString());
+                                if(mAdvertiseCallback != null){
+                                    mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes,mAdvertiseCallback);
 
-                                mBluetoothLeAdvertiser.startAdvertising(settings, data, mAdvertiseCallback);
-                                promise.resolve("Bluetooth BLE Advertising start.");
+                                    promise.resolve("Bluetooth BLE Advertising start.");
+                                }
                             }
                         }
 
@@ -205,6 +221,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
         settingsBuilder.setTimeout((int) TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES));
+        settingsBuilder.setConnectable(true);
         return settingsBuilder.build();
     }
 
@@ -227,7 +244,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
 //        String failureData = "1";
-//        dataBuilder.addServiceData(Constants.Service_UUID, failureData.getBytes());
 
         return dataBuilder.build();
     }
@@ -288,12 +304,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void addService(String uuid) {
+    public void addService(String uuid, boolean primary) {
         UUID SERVICE_UUID = UUID.fromString(uuid);
-        int type = BluetoothGattService.SERVICE_TYPE_PRIMARY;
+//        int type = BluetoothGattService.SERVICE_TYPE_PRIMARY;
+        int type = primary == true ? 0 : 1;
         BluetoothGattService tempService = new BluetoothGattService(SERVICE_UUID, type);
-
-
         Log.d(TAG, tempService.getCharacteristics().toString());
         Log.d(TAG,  tempService.getIncludedServices().toString());
         if (!this.servicesMap.containsKey(uuid))
@@ -301,7 +316,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void addCharacteristicToService(String serviceUUID, String uuid, Integer permissions, Integer properties) {
+    public void addCharacteristicToService(String serviceUUID, String uuid, Integer permissions, Integer properties, String data) {
         UUID CHAR_UUID = UUID.fromString(uuid);
         BluetoothGattCharacteristic tempChar = new BluetoothGattCharacteristic(CHAR_UUID, properties, permissions);
         this.servicesMap.get(serviceUUID).addCharacteristic(tempChar);
@@ -316,7 +331,9 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
                     mBluetoothDevices.add(device);
+                    Log.d(TAG, "devices:"+mBluetoothDevices.toString());
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+                    Log.d(TAG, "devices:"+mBluetoothDevices.toString());
                     mBluetoothDevices.remove(device);
                 }
             } else {
@@ -389,27 +406,51 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
     @SuppressLint("MissingPermission")
     @ReactMethod
-    public void sendNotificationToDevice(String serviceUUID, String charUUID, ReadableArray message){
-
+    public void sendNotificationToDevice(String serviceUUID, String charUUID, String message, Promise promise){
         Log.d(TAG, "데이터는 ~~~~~~~~");
         Log.d(TAG, serviceUUID+"/"+charUUID+"/"+ message);
-        byte[] decoded = new byte[message.size()];
-        for(int i=0; i< message.size(); i++){
-            decoded[i] = new Integer(message.getInt(i)).byteValue();
-        }
-        // 서비스 uuid를 가지고 특성 uuid를 꺼내오는 과정
-        BluetoothGattCharacteristic characteristic = servicesMap.get(serviceUUID).getCharacteristic(UUID.fromString(charUUID));
-        characteristic.setValue(decoded);
-        boolean indicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) == BluetoothGattCharacteristic.PROPERTY_INDICATE;
+        byte[] decoded = message.getBytes(StandardCharsets.UTF_8);
 
-        for(BluetoothDevice device : mBluetoothDevices){
-            mGattServer.notifyCharacteristicChanged(device, characteristic, false);
+        try{
+            // 서비스 uuid를 가지고 특성 uuid를 꺼내오는 과정
+            BluetoothGattCharacteristic characteristic = servicesMap.get(serviceUUID).getCharacteristic(UUID.fromString(charUUID));
+            characteristic.setValue(decoded);
+            boolean indicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) == BluetoothGattCharacteristic.PROPERTY_INDICATE;
+
+            for(BluetoothDevice device : mBluetoothDevices){
+                mGattServer.notifyCharacteristicChanged(device, characteristic, false);
+                Log.d(TAG, "device = "+device);
+            }
+            promise.resolve("Send Notification Success");
+        }catch (Exception e){
+            promise.reject("fail", "Send Notification Fail");
         }
+
     }
 
     @ReactMethod
     public void setSendData(String data){
         this.sendData = data;
+    }
+
+    @SuppressLint("MissingPermission")
+    @ReactMethod
+    public void removeAllServices(Promise promise){
+        try{
+            for (BluetoothGattService service : this.servicesMap.values()) {
+                mGattServer.removeService(service);
+            }
+            mGattServer.clearServices();
+            this.servicesMap = new HashMap<String, BluetoothGattService>();
+            promise.resolve("remove success");
+        }catch (Exception e){
+            promise.reject("remove fail");
+        }
+    }
+
+    @ReactMethod
+    public void deviceDisconnect(){
+
     }
 
 

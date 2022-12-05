@@ -37,28 +37,30 @@ export function stopAdvertising(): Promise<string> {
   return BluetoothClient.stopAdvertising();
 }
 
-export function addService(uuid: string): Promise<string> {
-  return BluetoothClient.addService(uuid);
+export function addService(uuid: string, primary: boolean): Promise<string> {
+  return BluetoothClient.addService(uuid, primary);
 }
 
 export function addCharacteristicToService(
   serviceUUID: string,
   uuid: string,
   permissions: number,
-  properties: number
+  properties: number,
+  data: string
 ): Promise<string> {
   return BluetoothClient.addCharacteristicToService(
     serviceUUID,
     uuid,
     permissions,
-    properties
+    properties,
+    data
   );
 }
 
 export function sendNotificationToDevice(
   serviceUUID: string,
   charUUID: string,
-  message: number[]
+  message: string
 ): Promise<string> {
   return BluetoothClient.sendNotificationToDevice(
     serviceUUID,
@@ -69,4 +71,12 @@ export function sendNotificationToDevice(
 
 export function setSendData(data: string) {
   return BluetoothClient.setSendData(data);
+}
+
+export function removeAllServices() {
+  return BluetoothClient.removeAllServices();
+}
+
+export function setName(name: String) {
+  return BluetoothClient.setName(name);
 }
