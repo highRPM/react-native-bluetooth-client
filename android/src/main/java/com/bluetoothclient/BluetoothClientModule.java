@@ -84,9 +84,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void setName(String name){
         Log.d(TAG, "set name = "+ name);
         this.name = name;
-//        ReactApplicationContext context = getReactApplicationContext();
-//        Intent enableBtIntent = new Intent(BluetoothDevice.ACTION_NAME_CHANGED);
-//        context.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT, null);
     }
 
     // Example method
@@ -185,7 +182,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             }
         }else{
             if (mAdvertiseCallback == null) {
-                bluetoothAdapter.setName(this.name); 
+                bluetoothAdapter.setName(this.name);
                 AdvertiseSettings settings = buildAdvertiseSettings();
                 AdvertiseData data = buildAdvertiseData();
                 AdvertiseData scanRes = new AdvertiseData.Builder()
@@ -299,25 +296,14 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      * 홍보를 중지하는 메소드. 광고를 중지하기 위해서는 해당 메소드를 실행하거나 앱을 완전히 종료해야한다.
      * @param promise
      */
+    @SuppressLint("MissingPermission")
     @ReactMethod
     private void stopAdvertising(Promise promise) {
         try {
             Log.d(TAG, "Service: Stopping Advertising");
             if (mBluetoothLeAdvertiser != null) {
-                if (ActivityCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    promise.reject("permission denied", "permission denied");
-                    return;
-                }
                 mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
                 mAdvertiseCallback = null;
-
                 promise.resolve("ok");
             }
         } catch (Exception e) {
@@ -355,11 +341,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                     mBluetoothDevices.add(device);
                     // TODO 디바이스 연결 관련 이벤트 추가
                     Log.d(TAG, "devices:"+mBluetoothDevices.toString());
-//                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-//                        .emit("onConnectedDevice", device.toString());
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-//                    getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-//                        .emit("onDisconnectedDevice", device.toString());
                     // TODO 디바이스 연결 해제 관련 이벤트 추가
                     Log.d(TAG, "devices:"+mBluetoothDevices.toString());
                     mBluetoothDevices.remove(device);
@@ -368,22 +350,14 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 mBluetoothDevices.remove(device);
             }
         }
+        @SuppressLint("MissingPermission")
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset,
                                                 BluetoothGattCharacteristic characteristic) {
             Log.d(TAG, "데이터를 요청?");
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
             if (offset != 0) {
-                if (ActivityCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
+
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_INVALID_OFFSET, offset,
                     /* value (optional) */ "hi".getBytes(StandardCharsets.UTF_8));
                 return;
@@ -398,6 +372,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             super.onNotificationSent(device, status);
         }
 
+        @SuppressLint("MissingPermission")
         @Override
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId,
                                                  BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded,
@@ -415,16 +390,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             Log.d(TAG, "데이터는 ~~~~~~~~");
             Log.d(TAG, map.toString());
             if (responseNeeded) {
-                if (ActivityCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
+
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
                 getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onReceiveData", map);
@@ -475,11 +441,5 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             promise.reject("remove fail");
         }
     }
-
-    @ReactMethod
-    public void deviceDisconnect(){
-
-    }
-
 
 }

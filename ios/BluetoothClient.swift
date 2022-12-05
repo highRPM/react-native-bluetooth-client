@@ -247,7 +247,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     }
     
     func getCharateristicService(_ service: CBMutableService, _ charateristicUUID: String) -> CBCharacteristic? {
-        print("-------------------------------------------------")
         for charateristic in service.characteristics ?? [] {
             let charUUID = CBUUID(string: charateristicUUID)
             print(charateristicUUID)
@@ -261,7 +260,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
                 alertJS("접근하려는 특성이 일치하지 않습니다.")
             }
         }
-        print("-------------------------------------------------")
         return nil
     }
     
@@ -330,10 +328,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
            }
            print("service: \(service)")
        }
-
-    
-    
-    
     
     func getCharacteristic(_ characteristicUUID: CBUUID) -> CBCharacteristic? {
             for (uuid, service) in serviceMap {
