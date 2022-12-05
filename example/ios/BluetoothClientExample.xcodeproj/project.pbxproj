@@ -39,6 +39,7 @@
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-BluetoothClientExample-BluetoothClientExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BluetoothClientExample-BluetoothClientExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B4392A12AC88292D35C810B /* Pods-BluetoothClientExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothClientExample.debug.xcconfig"; path = "Target Support Files/Pods-BluetoothClientExample/Pods-BluetoothClientExample.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-BluetoothClientExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothClientExample.release.xcconfig"; path = "Target Support Files/Pods-BluetoothClientExample/Pods-BluetoothClientExample.release.xcconfig"; sourceTree = "<group>"; };
+		57B0F03E292DCDB5000B0174 /* libreact-native-bluetooth-client.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-bluetooth-client.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B7EB9410499542E8C5724F5 /* Pods-BluetoothClientExample-BluetoothClientExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BluetoothClientExample-BluetoothClientExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-BluetoothClientExample-BluetoothClientExampleTests/Pods-BluetoothClientExample-BluetoothClientExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-BluetoothClientExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BluetoothClientExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = BluetoothClientExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -99,6 +100,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				57B0F03E292DCDB5000B0174 /* libreact-native-bluetooth-client.a */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-BluetoothClientExample.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-BluetoothClientExample-BluetoothClientExampleTests.a */,
@@ -486,6 +488,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 776Q3V7LB9;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = BluetoothClientExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -512,6 +515,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 776Q3V7LB9;
 				INFOPLIST_FILE = BluetoothClientExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

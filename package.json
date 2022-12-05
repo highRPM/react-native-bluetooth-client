@@ -152,6 +152,8 @@
     ]
   },
   "dependencies": {
-    "convert-string": "^0.1.0"
+    "convert-string": "^0.1.0",
+    "react-native-qrcode-svg": "^6.1.2",
+    "react-native-svg": "^13.6.0"
   }
 }
