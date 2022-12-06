@@ -73,7 +73,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     @objc func isAdvertising(_ resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock){
         resolve(advertising)
     }
-    
+      
     // BLE 서비스를 등록하는 함수
     @objc(addService:primary:)
     func addService(_ uuid: String, primary: Bool){

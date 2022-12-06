@@ -60,14 +60,15 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private Handler mHandler;
     private Intent enableBtIntent;
     private Runnable timeoutRunnable;
-    private long TIMEOUT = TimeUnit.MILLISECONDS.convert(3, TimeUnit.MINUTES);
+    private long TIMEOUT = 0;
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
     HashSet<BluetoothDevice> mBluetoothDevices;
     BluetoothGattServer mGattServer;
-    private String sendData ="";
+    private String sendData = "";
     private String name = "RnBLE";
     private BluetoothGatt mBluetoothGatt;
+
     public BluetoothClientModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -81,8 +82,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setName(String name){
-        Log.d(TAG, "set name = "+ name);
+    public void setName(String name) {
+        Log.d(TAG, "set name = " + name);
         this.name = name;
     }
 
@@ -123,10 +124,9 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
 
-    @SuppressLint("MissingPermission")
     @ReactMethod
-    public void startAdvertising(int timeout, Promise promise) {
-
+    public void startAdvertising(Promise promise) {
+        int timeout = 0;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
@@ -138,14 +138,18 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 Log.d(TAG, "manager not null");
                 Log.d(TAG, this.name);
                 bluetoothAdapter = mBluetoothManger.getAdapter();
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    promise.reject("permission error", "Please allow permission to use Bluetooth.");
+                    return;
+                }
                 bluetoothAdapter.setName(this.name);
 
                 if (bluetoothAdapter != null) {
-                    // 기본 광고 시간 관련해서 기본 값을 10분으로 준다.
+                    // 기본 광고 시간 관련해서 기본 값을 3분으로 준다.
                     if (timeout <= 0) {
                         timeout = 3;
                     }
-                    TIMEOUT = TimeUnit.MILLISECONDS.convert(timeout, TimeUnit.MINUTES);
+                    TIMEOUT = timeout;
                     if (bluetoothAdapter.isMultipleAdvertisementSupported()) {
                         //여기에 광고 시작 코드를 넣는다.
                         mBluetoothDevices = new HashSet<>();
@@ -161,15 +165,15 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                             AdvertiseData scanRes = new AdvertiseData.Builder()
                                 .setIncludeDeviceName(true)
                                 .build();
-                            mAdvertiseCallback = new SampleAdvertiseCallback();
+                            mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
                             if (mBluetoothLeAdvertiser != null) {
                                 Log.d(TAG, settings.toString());
                                 Log.d(TAG, data.toString());
-                                if(mAdvertiseCallback != null){
-                                    mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes,mAdvertiseCallback);
+                                if (mAdvertiseCallback != null) {
+                                    mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes, mAdvertiseCallback);
 
-                                    promise.resolve("Bluetooth BLE Advertising start.");
+
                                 }
                             }
                         }
@@ -180,7 +184,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                     }
                 }
             }
-        }else{
+        } else {
             if (mAdvertiseCallback == null) {
                 bluetoothAdapter.setName(this.name);
                 AdvertiseSettings settings = buildAdvertiseSettings();
@@ -188,13 +192,13 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 AdvertiseData scanRes = new AdvertiseData.Builder()
                     .setIncludeDeviceName(true)
                     .build();
-                mAdvertiseCallback = new SampleAdvertiseCallback();
+                mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
                 if (mBluetoothLeAdvertiser != null) {
                     Log.d(TAG, settings.toString());
                     Log.d(TAG, data.toString());
-                    if(mAdvertiseCallback != null){
-                        mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes,mAdvertiseCallback);
+                    if (mAdvertiseCallback != null) {
+                        mBluetoothLeAdvertiser.startAdvertising(settings, data, scanRes, mAdvertiseCallback);
 
                         promise.resolve("Bluetooth BLE Advertising start.");
                     }
@@ -209,20 +213,20 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      * Starts a delayed Runnable that will cause the BLE Advertising to timeout and stop after a
      * set amount of time.
      */
-    private void setTimeout() {
-        mHandler = new Handler();
-        Log.d(TAG, "set timeout");
-        timeoutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "AdvertiserService has reached timeout of " + TIMEOUT + " milliseconds, stopping advertising.");
-                sendFailureIntent(ADVERTISING_TIMED_OUT);
-                ReactApplicationContext context = getReactApplicationContext();
-                context.stopService(enableBtIntent);
-            }
-        };
-        mHandler.postDelayed(timeoutRunnable, TIMEOUT);
-    }
+//    private void setTimeout() {
+//        mHandler = new Handler();
+//        Log.d(TAG, "set timeout");
+//        timeoutRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.d(TAG, "AdvertiserService has reached timeout of " + TIMEOUT + " milliseconds, stopping advertising.");
+//                sendFailureIntent(ADVERTISING_TIMED_OUT);
+//                ReactApplicationContext context = getReactApplicationContext();
+//                context.stopService(enableBtIntent);
+//            }
+//        };
+//        mHandler.postDelayed(timeoutRunnable, TIMEOUT);
+//    }
 
 
     /**
@@ -239,7 +243,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
         settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
-        settingsBuilder.setTimeout((int) TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES));
+        settingsBuilder.setTimeout((int) TimeUnit.MILLISECONDS.convert(TIMEOUT, TimeUnit.MINUTES));
         settingsBuilder.setConnectable(true);
         return settingsBuilder.build();
     }
@@ -274,11 +278,18 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      */
     private class SampleAdvertiseCallback extends AdvertiseCallback {
 
+        private Promise promise;
+
+        public SampleAdvertiseCallback(Promise promise) {
+            this.promise = promise;
+        }
+
         @Override
         public void onStartFailure(int errorCode) {
             super.onStartFailure(errorCode);
 
             Log.d(TAG, "Advertising failed");
+            promise.reject("error", errorCode + "");
             sendFailureIntent(errorCode);
             ReactApplicationContext context = getReactApplicationContext();
             context.stopService(enableBtIntent);
@@ -288,6 +299,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             super.onStartSuccess(settingsInEffect);
+            promise.resolve("Bluetooth BLE Advertising started.");
             Log.d(TAG, "Advertising successfully started");
         }
     }
@@ -296,12 +308,15 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      * 홍보를 중지하는 메소드. 광고를 중지하기 위해서는 해당 메소드를 실행하거나 앱을 완전히 종료해야한다.
      * @param promise
      */
-    @SuppressLint("MissingPermission")
     @ReactMethod
     private void stopAdvertising(Promise promise) {
         try {
             Log.d(TAG, "Service: Stopping Advertising");
             if (mBluetoothLeAdvertiser != null) {
+                if (ActivityCompat.checkSelfPermission(getReactApplicationContext(), Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
+                    promise.reject("error", "Please allow permission to use Bluetooth.");
+                    return;
+                }
                 mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
                 mAdvertiseCallback = null;
                 promise.resolve("ok");
