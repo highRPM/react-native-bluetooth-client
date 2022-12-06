@@ -60,12 +60,8 @@ checkBluetooth()
 
 ```jsx
 checkBluetooth()
-        .then((res) => {
-					//Success code
-				})
-				.catch((e) => {
-					//Fail code
-				})
+    .then((res) => {})
+    .catch((e) => {})
 ```
 
 ### `enableBluetooth`(Android 전용)
