@@ -40,8 +40,8 @@ import { checkBluetooth } from 'react-native-bluetooth-client';
 
 //블루투스를 실행할 수 있는지 확인하는 함수
 checkBluetooth()
-        .then((res) => {})
-				.catch((e) => {})
+    .then((res) => {})
+    .catch((e) => {})
 ```
 
 ## Methods
@@ -161,24 +161,25 @@ addCharacteristicToService(
 ```
 
 <aside>
-💡 Permission
-1 - Readable
-2 - Read Encrypted
-16 - Write
-32 - Write Encrypted
+💡 Permission <br/>
+1 - Readable  <br/>
+2 - Read Encrypted  <br/>
+16 - Write  <br/>
+32 - Write Encrypted  <br/>
 
 </aside>
 
+<br/>
 <aside>
-💡 Properties
-1 - Broadcast
-2 - Read
-4 - Write No Response
-8 - Write
-16 - Notify
-32 - Indicate
-64 - Signed Write
-128 - Extended Props
+💡 Properties <br/>
+1 - Broadcast <br/>
+2 - Read<br/>
+4 - Write No Response<br/>
+8 - Write<br/>
+16 - Notify<br/>
+32 - Indicate<br/>
+64 - Signed Write<br/>
+128 - Extended Props<br/>
 
 </aside>
 
