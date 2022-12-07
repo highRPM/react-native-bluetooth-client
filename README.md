@@ -4,7 +4,7 @@ React Native 블루투스 Peripheral 모드를 가능하게 해주는 라이브�
 
 ## Installation
 
----
+
 
 ```jsx
 npm install react-native-bluetooth-client
@@ -31,7 +31,7 @@ npm install react-native-bluetooth-client
 
 ## Usage
 
----
+
 
 ```jsx
 import { checkBluetooth } from 'react-native-bluetooth-client';
@@ -46,7 +46,7 @@ checkBluetooth()
 
 ## Methods
 
----
+
 
 사용가능한 함수
 
@@ -217,7 +217,7 @@ sendNotificationToDevice(
 
 ## Events
 
----
+
 
 ### `onReceiveData`
 
@@ -272,6 +272,6 @@ setName('BLE_LIB');
 
 MIT
 
----
+
 
 Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
