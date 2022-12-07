@@ -1,7 +1,7 @@
 {
   "name": "react-native-bluetooth-client",
-  "version": "0.1.0",
-  "description": "test",
+  "version": "0.1.1",
+  "description": "React Native BLE Peripheral Library",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
@@ -38,7 +38,10 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "bluetooth",
+    "ble",
+    "peripheral"
   ],
   "repository": "https://github.com/highRPM/react-native-bluetooth-client",
   "author": "ohsunghwan <ohsunghwan5@naver.com> (https://github.com/highRPM)",
@@ -152,8 +155,6 @@
     ]
   },
   "dependencies": {
-    "convert-string": "^0.1.0",
-    "react-native-qrcode-svg": "^6.1.2",
-    "react-native-svg": "^13.6.0"
+
   }
 }
