@@ -27,7 +27,7 @@ npm install react-native-bluetooth-client
 <string></string>
 ```
 
-위 내용을 추가해준다. <string></string> 사이에는 권한 요청 때 보여줄 설명을 입력한다.
+위 내용을 추가해준다. `<string></string>` 사이에는 권한 요청 때 보여줄 설명을 입력한다.
 
 ## Usage
 
