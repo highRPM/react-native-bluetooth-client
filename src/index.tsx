@@ -29,8 +29,8 @@ export function enableBluetooth() {
   return BluetoothClient.enableBluetooth();
 }
 
-export function startAdvertising(): Promise<string> {
-  return BluetoothClient.startAdvertising();
+export function startAdvertising(t: number): Promise<string> {
+  return BluetoothClient.startAdvertising(t);
 }
 
 export function stopAdvertising(): Promise<string> {
