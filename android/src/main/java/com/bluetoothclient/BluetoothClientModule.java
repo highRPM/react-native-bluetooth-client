@@ -125,7 +125,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void startAdvertising(Promise promise) {
+    public void startAdvertising(int t ,Promise promise) {
         int timeout = 0;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.d(TAG, "ad start");
