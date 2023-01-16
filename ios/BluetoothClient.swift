@@ -13,6 +13,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     var startPromiseReject: RCTPromiseRejectBlock?
     var sendData: String = ""
     var notiDevices = Array<CBCentral>()
+    let blState: Any = ""
     override init(){
         super.init()
         manager = CBPeripheralManager(delegate: self, queue: nil, options: nil)
@@ -81,14 +82,17 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         print("serviceUUID \(serviceUUID)")
         let service = CBMutableService(type: serviceUUID, primary: primary) // 서비스를 로컬 데이터베이스에 추가하고 서비스가 게시되면 더 이상 변경할 수 없다.
         print("service \(service)")
-        if(serviceMap.keys.contains(uuid) != true){
-            serviceMap[uuid] = service
-            serviceMap[uuid]?.characteristics = [CBCharacteristic]()
-            print("서비스 등록 부분까지 들어왔다.")
-            manager.add(service)    // 기기의 정보를 Central에서 요청했을 때 사용가능한 Service에 등록시켜주는 함수
-        }else{
-            alertJS("A \(uuid) that already exists.")
+        if(manager.state == .poweredOn){
+            if(serviceMap.keys.contains(uuid) != true){
+                serviceMap[uuid] = service
+                serviceMap[uuid]?.characteristics = [CBCharacteristic]()
+                print("서비스 등록 부분까지 들어왔다.")
+                manager.add(service)    // 기기의 정보를 Central에서 요청했을 때 사용가능한 Service에 등록시켜주는 함수
+            }else{
+                alertJS("A \(uuid) that already exists.")
+            }
         }
+      
     }
     
     //서비스에 관련된 특성을 추가해주는 함수
@@ -140,10 +144,13 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         print(CBAttributePermissions.writeable)
         let charateristic = CBMutableCharacteristic(type: charateristicUUID, properties: propertiesValue, value: nil, permissions: permissionVlaue)
         print("추가한 캐릭터는 \(charateristic) ")
-        serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
-        manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
-        manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
-      
+        if(manager.state == .poweredOn){
+            serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
+            manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
+            manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
+        }else {
+            alertJS("권한이 설정되지 않았거나 블루투스 전원이 꺼져있습니다.")
+        }
     }
     
     
