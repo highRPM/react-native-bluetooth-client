@@ -97,7 +97,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     
     //서비스에 관련된 특성을 추가해주는 함수
     @objc(addCharacteristicToService:uuid:permissions:properties:data:)
-    func addCharacteristicToService(_ serviceUUID: String, uuid: String, permissions: UInt, properties: UInt, data: String){
+    func addCharacteristicToService(_ serviceUUID: String!, uuid: String, permissions: UInt, properties: UInt, data: String){
         let charateristicUUID = CBUUID(string: uuid)
         var propertiesValue = CBCharacteristicProperties(rawValue: properties) // 해당 서비스의 특성에 적용될 유형
         var permissionVlaue = CBAttributePermissions(rawValue: permissions) // 해당 서비스의 특성에 적용될 권한. 이 유형들에 따라서 Peripheral 기기의 데이터를 read 하거나 write 할 수 있다.
@@ -145,10 +145,13 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         let charateristic = CBMutableCharacteristic(type: charateristicUUID, properties: propertiesValue, value: nil, permissions: permissionVlaue)
         print("추가한 캐릭터는 \(charateristic) ")
         if(manager.state == .poweredOn){
-            serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
-            manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
-            manager.remove(serviceMap[serviceUUID]!)
-            manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
+            if(serviceUUID != nil){
+                serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
+                manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
+                manager.remove(serviceMap[serviceUUID]!)
+                manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
+            }
+          
         }else {
             alertJS("권한이 설정되지 않았거나 블루투스 전원이 꺼져있습니다.")
         }
