@@ -147,6 +147,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         if(manager.state == .poweredOn){
             serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
             manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
+            manager.remove(serviceMap[serviceUUID]!)
             manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
         }else {
             alertJS("권한이 설정되지 않았거나 블루투스 전원이 꺼져있습니다.")
