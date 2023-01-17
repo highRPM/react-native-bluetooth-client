@@ -37,7 +37,7 @@ export function stopAdvertising(): Promise<string> {
   return BluetoothClient.stopAdvertising();
 }
 
-export function addService(uuid: string, primary: boolean): Promise<string> {
+export function addService(uuid: string, primary: boolean): string {
   return BluetoothClient.addService(uuid, primary);
 }
 
@@ -47,7 +47,7 @@ export function addCharacteristicToService(
   permissions: number,
   properties: number,
   data: string
-): Promise<string> {
+): string {
   return BluetoothClient.addCharacteristicToService(
     serviceUUID,
     uuid,
