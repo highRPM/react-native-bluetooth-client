@@ -13,7 +13,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     var startPromiseReject: RCTPromiseRejectBlock?
     var sendData: String = ""
     var notiDevices = Array<CBCentral>()
-    let blState: Any = ""
+    var blState: Any = ""
     override init(){
         super.init()
         manager = CBPeripheralManager(delegate: self, queue: nil, options: nil)
@@ -47,6 +47,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
               } else {
                   state = peripheral.state
               }
+        blState = state;
               alertJS("BT state change: \(state)")
     }
     
@@ -73,6 +74,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     // 광고 중인지 아닌지 확인하는 함수
     @objc func isAdvertising(_ resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock){
         resolve(advertising)
+    
     }
       
     // BLE 서비스를 등록하는 함수
@@ -145,12 +147,15 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         let charateristic = CBMutableCharacteristic(type: charateristicUUID, properties: propertiesValue, value: nil, permissions: permissionVlaue)
         print("추가한 캐릭터는 \(charateristic) ")
         if(manager.state == .poweredOn){
-            if(serviceUUID != nil){
+            if(serviceMap[serviceUUID] != nil){
+                
                 serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
                 manager.removeAllServices() // 로컬에 등록된 서비스를 다 날린다.
                 manager.remove(serviceMap[serviceUUID]!)
                 manager.add(serviceMap[serviceUUID]!)   // 위의 특성을 추가한 서비스를 등록시켜준다.
             }
+           
+           
           
         }else {
             alertJS("권한이 설정되지 않았거나 블루투스 전원이 꺼져있습니다.")
@@ -191,6 +196,8 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     @objc
     func stopAdvertising(_ resolve:RCTPromiseResolveBlock, rejecter reject:RCTPromiseRejectBlock) -> Void {
         manager.stopAdvertising();
+        manager.removeAllServices();
+                                                                                                                                                         
         advertising = false
         resolve("stop advertising")
     }
@@ -364,7 +371,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
             let error = NSError(domain: "", code: 101, userInfo: nil)
             reject("not supported", "This device does not support Bluetooth.", error)
         }else{
-            resolve("supported")
+            resolve(blState);
         }
     }
     
@@ -381,6 +388,8 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         resolve("remove success")
         
     }
+    
+
     
     
 }

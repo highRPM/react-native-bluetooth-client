@@ -1,6 +1,6 @@
 {
   "name": "react-native-bluetooth-client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "React Native BLE Peripheral Library",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

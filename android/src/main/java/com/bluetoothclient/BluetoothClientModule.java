@@ -105,7 +105,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         if (bluetoothAdapter == null) {
             promise.reject("bluetooth not supported", "...");
         } else {
-            promise.resolve("supported");
+            promise.resolve(5);
         }
     }
 
