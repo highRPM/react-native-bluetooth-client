@@ -319,6 +319,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 }
                 mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
                 mAdvertiseCallback = null;
+                mBluetoothLeAdvertiser = null;
                 promise.resolve("ok");
             }
         } catch (Exception e) {
