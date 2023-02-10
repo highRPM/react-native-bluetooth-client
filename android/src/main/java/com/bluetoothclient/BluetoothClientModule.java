@@ -125,8 +125,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void startAdvertising(Integer t ,Promise promise) {
-        Integer timeout = t;
+    public void startAdvertising(int t ,Promise promise) {
+        int timeout = t;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
@@ -146,7 +146,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
                 if (bluetoothAdapter != null) {
                     // 기본 광고 시간 관련해서 기본 값을 3분으로 준다.
-                    if (timeout == null || timeout <= 0) {
+                    if (timeout <= 0) {
                         timeout = 3;
                     }
                     TIMEOUT = timeout;
