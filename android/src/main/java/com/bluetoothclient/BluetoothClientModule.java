@@ -146,7 +146,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
                 if (bluetoothAdapter != null) {
                     // 기본 광고 시간 관련해서 기본 값을 3분으로 준다.
-                    if (timeout <= 0) {
+                    if (timeout >= 3) {
                         timeout = 3;
                     }
                     TIMEOUT = timeout;
