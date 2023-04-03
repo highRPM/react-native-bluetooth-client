@@ -1,6 +1,5 @@
 package com.bluetoothclient;
 
-import static androidx.core.content.PackageManagerCompat.LOG_TAG;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
