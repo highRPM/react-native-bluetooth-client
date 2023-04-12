@@ -76,14 +76,17 @@ enableBluetooth();
 
 ### `startAdvertising`
 
-Peripheral 모드를 실행하는 함수. Android 기준 3분동안 해당 함수가 실행된다.
+Peripheral 모드를 실행하는 함수. Android 기준 받은 매개변수의 시간동안(최대 3분) 해당 함수가 실행된다.
 
 3분이 지나면 자동으로 stopAdvertising이 된다.
 
-**Examples**
+**매개변수**
 
+t(Number) → 홍보할 시간을 정한다.(1 입력하면 1분동안 홍보)  
+0을 입력하면 무한으로 홍보하게 된다.
+**Examples**
 ```jsx
-startAdvertising()
+startAdvertising(t)
       .then((e) => console.log(e))
       .catch((err) => console.log(err));
 ```
