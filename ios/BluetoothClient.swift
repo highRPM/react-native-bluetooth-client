@@ -212,7 +212,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
             }else{
                 let char = charateristic as! CBMutableCharacteristic
                 print(char.subscribedCentrals)
-                char.value = data.data(using: .utf8) ?? Data()
+                char.value = Data(base64Encoded: data) ?? Data()
                 print(data.count)
                 
                 //onSubscribedCentrals 여기에 Central 객체를 넣어주면 해당 Central에게만 알림이 가게된다.
@@ -239,11 +239,10 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    func onReceiveData(_ data:String, device: UUID){
+    func onReceiveData(_ data: String?, device: UUID){
         
         if(hasListeners){
-            let buf: [UInt8] = Array(data.utf8)
-            let dataDic = ["data":buf, "device":device.uuidString] as [String : Any]
+            let dataDic = ["data":data, "device":device.uuidString] as [String : Any]
             print(dataDic)
             sendEvent(withName: "onReceiveData", body: dataDic)
             
@@ -310,7 +309,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
                 print(request.central.identifier)
                 char.value = request.value
                 let val: Data? = request.value
-                onReceiveData(String(decoding: val!, as: UTF8.self), device: request.central.identifier)
+                onReceiveData(val?.base64EncodedString(), device: request.central.identifier)
             }else{
                 alertJS("액세스 하려는 특성이 일치하지 않습니다.")
             }

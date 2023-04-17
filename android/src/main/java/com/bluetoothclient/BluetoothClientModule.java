@@ -412,12 +412,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void sendNotificationToDevice(String serviceUUID, String charUUID, String message, Promise promise){
         Log.d(TAG, "데이터는 ~~~~~~~~");
         Log.d(TAG, serviceUUID+"/"+charUUID+"/"+ message);
-        byte[] decoded = message.getBytes(StandardCharsets.UTF_8);
 
         try{
             // 서비스 uuid를 가지고 특성 uuid를 꺼내오는 과정
             BluetoothGattCharacteristic characteristic = servicesMap.get(serviceUUID).getCharacteristic(UUID.fromString(charUUID));
-            characteristic.setValue(decoded);
+            characteristic.setValue(Base64.decode(message, Base64.DEFAULT));
             boolean indicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) == BluetoothGattCharacteristic.PROPERTY_INDICATE;
 
             for(BluetoothDevice device : mBluetoothDevices){
