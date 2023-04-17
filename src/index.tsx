@@ -69,7 +69,11 @@ export function sendNotificationToDevice(
   );
 }
 
-export function setSendData(serviceUUID: string, charUUID: string, data: string) {
+export function setSendData(
+  serviceUUID: string,
+  charUUID: string,
+  data: string
+): Promise<string> {
   return BluetoothClient.setSendData(serviceUUID, charUUID, data);
 }
 
