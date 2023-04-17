@@ -11,7 +11,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     var manager: CBPeripheralManager!
     var startPromiseResolve: RCTPromiseResolveBlock?
     var startPromiseReject: RCTPromiseRejectBlock?
-    var sendData: String = ""
     var notiDevices = Array<CBCentral>()
     var blState: Any = ""
     override init(){
@@ -287,8 +286,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         let charateristic = getCharacteristic(request.characteristic.uuid)
         
         if(charateristic != nil){
-//            charateristic?.value = self.sendData
-            request.value = sendData.data(using: .utf8)
+            request.value = charateristic.value
             
             manager.respond(to: request, withResult: .success)
         }else{
@@ -376,9 +374,16 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     }
     
     @objc
-    func setSendData(_ data: String){
-        
-        self.sendData = data
+    func setSendData(_ serviceUUID: String, charUUID: String, data: String, resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
+        if let service = serviceMap[serviceUUID],
+               char = getCharateristicService(service, charUUID),
+               decodedData = Data(base64Encoded: data)
+        {
+            char.value = decodedData
+            resolve("set success")
+        } else {
+            reject("fail", "set fail", nil)
+        }
     }
     
     @objc

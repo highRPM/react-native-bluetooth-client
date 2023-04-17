@@ -69,8 +69,8 @@ export function sendNotificationToDevice(
   );
 }
 
-export function setSendData(data: string) {
-  return BluetoothClient.setSendData(data);
+export function setSendData(serviceUUID: string, charUUID: string, data: string) {
+  return BluetoothClient.setSendData(serviceUUID, charUUID, data);
 }
 
 export function removeAllServices() {

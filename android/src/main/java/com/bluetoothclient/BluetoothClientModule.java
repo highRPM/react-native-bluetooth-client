@@ -64,7 +64,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     HashMap<String, BluetoothGattService> servicesMap;
     HashSet<BluetoothDevice> mBluetoothDevices;
     BluetoothGattServer mGattServer;
-    private String sendData = "";
     private String name = "RnBLE";
     private BluetoothGatt mBluetoothGatt;
 
@@ -369,17 +368,12 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset,
                                                 BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, "데이터를 요청?");
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-            if (offset != 0) {
-
-                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_INVALID_OFFSET, offset,
-                    /* value (optional) */ "hi".getBytes(StandardCharsets.UTF_8));
-                return;
+            if (offset > characteristic.getValue().length) {
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_INVALID_OFFSET, 0, null);
+            } else {
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristic.getValue());
             }
-            characteristic.setValue(sendData.getBytes(StandardCharsets.UTF_8));
-            mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS,
-                offset, characteristic.getValue());
         }
 
         @Override
@@ -438,8 +432,17 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setSendData(String data){
-        this.sendData = data;
+    public void setSendData(String serviceUUID, String charUUID, String data, Promise promise) {
+        try {
+            BluetoothGattService service = this.servicesMap.get(serviceUUID);
+            if (!service) return promise.reject("fail", "service not found");
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charUUID));
+            if (!characteristic) return promise.reject("fail", "characteristic not found");
+            characteristic.setValue(Base64.decode(data, Base64.DEFAULT));
+            promise.resolve("set success");
+        } catch (Exception e){
+            promise.reject("fail", e);
+        }
     }
 
     @SuppressLint("MissingPermission")
