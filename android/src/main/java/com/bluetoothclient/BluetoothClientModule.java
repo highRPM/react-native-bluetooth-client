@@ -395,6 +395,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 data.pushInt((int) b);
             }
             map.putArray("data", data);
+            map.putString("serviceUUID", characteristic.getService().getUuid().toString());
+            map.putString("charUUID", characteristic.getUuid().toString());
             map.putString("device", device.toString());
             Log.d(TAG, "데이터는 ~~~~~~~~");
             Log.d(TAG, map.toString());

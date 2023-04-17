@@ -239,10 +239,15 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    func onReceiveData(_ data: String?, device: UUID){
+    func onReceiveData(serviceUUID: UUID, charUUID: UUID, data: String?, device: UUID){
         
         if(hasListeners){
-            let dataDic = ["data":data, "device":device.uuidString] as [String : Any]
+            let dataDic: [String : Any] = [
+                "data": data,
+                "serviceUUID": serviceUUID.uuidString,
+                "charUUID": charUUID.uuidString,
+                "device": device.uuidString
+            ]
             print(dataDic)
             sendEvent(withName: "onReceiveData", body: dataDic)
             
@@ -309,7 +314,12 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
                 print(request.central.identifier)
                 char.value = request.value
                 let val: Data? = request.value
-                onReceiveData(val?.base64EncodedString(), device: request.central.identifier)
+                onReceiveData(
+                    serviceUUID: request.characteristic.service.uuid,
+                    charUUID: request.characteristic.uuid,
+                    data: val?.base64EncodedString(),
+                    device: request.central.identifier
+                )
             }else{
                 alertJS("액세스 하려는 특성이 일치하지 않습니다.")
             }
