@@ -4,11 +4,6 @@
 
 @interface RCT_EXTERN_MODULE(BluetoothClient, RCTEventEmitter)
 
-RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
-                 withResolver:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
-
-
 RCT_EXTERN_METHOD(
     isAdvertising:
     (RCTPromiseResolveBlock)resolve

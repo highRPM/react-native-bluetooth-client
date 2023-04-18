@@ -17,10 +17,6 @@ const BluetoothClient = NativeModules.BluetoothClient
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return BluetoothClient.multiply(a, b);
-}
-
 export function checkBluetooth(): Promise<string> {
   return BluetoothClient.checkBluetooth();
 }

@@ -86,14 +86,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         this.name = name;
     }
 
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    public void multiply(double a, double b, Promise promise) {
-        promise.resolve(a * b);
-    }
-
-
     /**
      * 블루투스를 지원하는 기기인지 확인하는 메소드
      *

@@ -161,15 +161,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    
-    
-    
-    
-  @objc(multiply:withB:withResolver:withRejecter:)
-  func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-    resolve(a*b)
-  }
-    
     @objc
     func startAdvertising(_ time: Int, resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void{
         
