@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.provider.SyncStateContract;
 import android.util.Log;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -436,9 +437,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void setSendData(String serviceUUID, String charUUID, String data, Promise promise) {
         try {
             BluetoothGattService service = this.servicesMap.get(serviceUUID);
-            if (!service) return promise.reject("fail", "service not found");
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charUUID));
-            if (!characteristic) return promise.reject("fail", "characteristic not found");
             characteristic.setValue(Base64.decode(data, Base64.DEFAULT));
             promise.resolve("set success");
         } catch (Exception e){
