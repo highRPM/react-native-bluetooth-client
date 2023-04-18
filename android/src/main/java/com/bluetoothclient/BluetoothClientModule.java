@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.provider.SyncStateContract;
 import android.util.Log;
 import android.util.Base64;
+import android.os.ParcelUuid;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -47,6 +48,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 @ReactModule(name = BluetoothClientModule.NAME)
 public class BluetoothClientModule extends ReactContextBaseJavaModule {
@@ -257,7 +259,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.setIncludeDeviceName(true);
 
-        for (Map.Entry<String, byte[]> pair: this.advertiseServices.entrySet()) {
+        for (Map.Entry<ParcelUuid, byte[]> pair: this.advertiseServices.entrySet()) {
             dataBuilder.addServiceUuid(pair.getKey());
             dataBuilder.addServiceData(pair.getKey(), pair.getValue());
         }
@@ -330,7 +332,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         try {
             ParcelUuid serviceUuid = ParcelUuid.fromString(uuid);
             if (!this.advertiseServices.containsKey(serviceUuid)) {
-                byte[] data = serviceData ? Base64.decode(serviceData, Base64.DEFAULT) : new byte[0];
+                byte[] data = serviceData != null ? Base64.decode(serviceData, Base64.DEFAULT) : new byte[0];
                 this.advertiseServices.put(serviceUuid, data);
             }
             promise.resolve("ok");
@@ -439,8 +441,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 Log.d(TAG, "device = "+device);
             }
             promise.resolve("Send Notification Success");
-        }catch (Exception e){
-            promise.reject("fail", "Send Notification Fail");
+        } catch (Exception e) {
+            promise.reject("fail", e);
         }
 
     }
@@ -469,8 +471,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             this.servicesMap = new HashMap<String, BluetoothGattService>();
             this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
             promise.resolve("remove success");
-        }catch (Exception e){
-            promise.reject("remove fail");
+        } catch (Exception e){
+            promise.reject("remove fail", e);
         }
     }
 
