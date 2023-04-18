@@ -115,6 +115,20 @@ stopAdvertising()
       .catch((e) => console.log(e));
 ```
 
+### `addAdvertiseService`
+
+**매개변수**
+
+UUID(String) → 서비스 등록에 사용할 UUID 값을 입력해준다.
+
+ServiceData(String) → 홍보할 데이터를 입력해준다.
+
+**Examples**
+
+```jsx
+addAdvertiseService('0000XXXX-0000-1000-8000-00805f9b34fb', 'SGVsbG8gV29ybGQ=');
+```
+
 ### `addService`
 
 BLE Service를 추가해주는 함수이다.

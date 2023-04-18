@@ -63,6 +63,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private long TIMEOUT = 0;
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
+    HashMap<ParcelUuid, byte[]> advertiseServices;
     HashSet<BluetoothDevice> mBluetoothDevices;
     BluetoothGattServer mGattServer;
     private String name = "RnBLE";
@@ -72,6 +73,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.servicesMap = new HashMap<String, BluetoothGattService>();
+        this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
     }
 
     @Override
@@ -253,8 +255,13 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
          */
 
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-        dataBuilder.addServiceUuid(Constants.Service_UUID);
         dataBuilder.setIncludeDeviceName(true);
+
+        for (Map.Entry<String, byte[]> pair: this.advertiseServices.entrySet()) {
+            dataBuilder.addServiceUuid(pair.getKey());
+            dataBuilder.addServiceData(pair.getKey(), pair.getValue());
+        }
+
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
 //        String failureData = "1";
@@ -319,13 +326,27 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void addAdvertiseService(String uuid, String serviceData, Promise promise) {
+        try {
+            ParcelUuid serviceUuid = ParcelUuid.fromString(uuid);
+            if (!this.advertiseServices.containsKey(serviceUuid)) {
+                byte[] data = serviceData ? Base64.decode(serviceData, Base64.DEFAULT) : new byte[0];
+                this.advertiseServices.put(serviceUuid, data);
+            }
+            promise.resolve("ok");
+        } catch (Exception e) {
+            promise.reject("error", e);
+        }
+    }
+
+    @ReactMethod
     public void addService(String uuid, boolean primary) {
         UUID SERVICE_UUID = UUID.fromString(uuid);
 //        int type = BluetoothGattService.SERVICE_TYPE_PRIMARY;
         int type = primary == true ? 0 : 1;
         BluetoothGattService tempService = new BluetoothGattService(SERVICE_UUID, type);
         Log.d(TAG, tempService.getCharacteristics().toString());
-        Log.d(TAG,  tempService.getIncludedServices().toString());
+        Log.d(TAG, tempService.getIncludedServices().toString());
         if (!this.servicesMap.containsKey(uuid))
             this.servicesMap.put(uuid, tempService);
     }
@@ -394,7 +415,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             Log.d(TAG, "데이터는 ~~~~~~~~");
             Log.d(TAG, map.toString());
             if (responseNeeded) {
-
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
                 getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onReceiveData", map);
@@ -447,6 +467,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             }
             mGattServer.clearServices();
             this.servicesMap = new HashMap<String, BluetoothGattService>();
+            this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
             promise.resolve("remove success");
         }catch (Exception e){
             promise.reject("remove fail");

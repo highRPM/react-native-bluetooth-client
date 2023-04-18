@@ -14,6 +14,10 @@ RCT_EXTERN_METHOD(
     setName: (NSString *)string
 )
 RCT_EXTERN_METHOD(
+    addAdvertiseService: (NSString *)uuid
+    serviceData: (NSString *)serviceData
+)
+RCT_EXTERN_METHOD(
     addService: (NSString *)uuid
     primary:    (BOOL)primary
 )

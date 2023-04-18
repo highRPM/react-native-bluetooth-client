@@ -33,6 +33,10 @@ export function stopAdvertising(): Promise<string> {
   return BluetoothClient.stopAdvertising();
 }
 
+export function addAdvertiseService(uuid: string, serviceData: string): string {
+  return BluetoothClient.addAdvertiseService(uuid, serviceData);
+}
+
 export function addService(uuid: string, primary: boolean): string {
   return BluetoothClient.addService(uuid, primary);
 }

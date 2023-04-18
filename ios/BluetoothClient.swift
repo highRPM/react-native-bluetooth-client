@@ -8,6 +8,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     var hasListeners: Bool = false
     var name: String = "abcdefghijklmnopqrstuvwxyz"
     var serviceMap = Dictionary<String, CBMutableService>()
+    var serviceDataMap: [CBUUID: Data] = [:]
     var manager: CBPeripheralManager!
     var startPromiseResolve: RCTPromiseResolveBlock?
     var startPromiseReject: RCTPromiseRejectBlock?
@@ -75,10 +76,28 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         resolve(advertising)
     
     }
+
+    // BLE 서비스를 등록하는 함수
+    @objc(addAdvertiseService:serviceData:)
+    func addAdvertiseService(_ uuid: String, serviceData: String) {
+        let serviceUUID = CBUUID(string: uuid) // Corebluetooth의 UUID를 만드는 함수 Base UUID가 미리 채워진 상태로 만들어진다.
+        if(manager.state == .poweredOn){
+            if (serviceMap.keys.contains(uuid) != true) {
+                if (serviceData != nil) {
+                    serviceDataMap[serviceUUID] = Data(base64Encoded: serviceData)
+                } else {
+                    serviceDataMap[serviceUUID] = Data()
+                }
+            } else {
+                alertJS("A \(uuid) that already exists.")
+            }
+        }
+
+    }
       
     // BLE 서비스를 등록하는 함수
     @objc(addService:primary:)
-    func addService(_ uuid: String, primary: Bool){
+    func addService(_ uuid: String, primary: Bool) {
         let serviceUUID = CBUUID(string: uuid) // Corebluetooth의 UUID를 만드는 함수 Base UUID가 미리 채워진 상태로 만들어진다.
         print("serviceUUID \(serviceUUID)")
         let service = CBMutableService(type: serviceUUID, primary: primary) // 서비스를 로컬 데이터베이스에 추가하고 서비스가 게시되면 더 이상 변경할 수 없다.
@@ -145,7 +164,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         print(CBAttributePermissions.writeable)
         let charateristic = CBMutableCharacteristic(type: charateristicUUID, properties: propertiesValue, value: nil, permissions: permissionVlaue)
         print("추가한 캐릭터는 \(charateristic) ")
-        if(manager.state == .poweredOn){
+        if (manager.state == .poweredOn) {
             if(serviceMap[serviceUUID] != nil){
                 
                 serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
@@ -177,7 +196,8 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         
         let advertisementData = [
             CBAdvertisementDataLocalNameKey: name, //블루투스 검색시 나오게 될 이름
-            CBAdvertisementDataServiceUUIDsKey: getServiceUUIDArray()
+            CBAdvertisementDataServiceUUIDsKey: getServiceUUIDArray(),
+            CBAdvertisementDataServiceDataKey: serviceDataMap,
         ] as [String : Any] // 안에 데이터와 함께 초기화를 시켜줌
         print(advertisementData)
         manager.startAdvertising(advertisementData)
@@ -252,7 +272,10 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     func getServiceUUIDArray() -> Array<CBUUID>{
         
         var serviceArray = [CBUUID]() // 배열 선언 및 초기화 CBUUID 타입으로 배열을 초기화 하고 선언한 것이다.
-        for(_, service) in serviceMap{ // "_" 를 사용하는 이유는 사용하지 않는 값을 생략하고 사용하기 위해서 선언한다. wildcard pattern 이라고한다.
+        for (uuid, _) in serviceDataMap {
+            serviceArray.append(uuid)
+        }
+        for (_, service) in serviceMap { // "_" 를 사용하는 이유는 사용하지 않는 값을 생략하고 사용하기 위해서 선언한다. wildcard pattern 이라고한다.
             serviceArray.append(service.uuid)
         }
         return serviceArray
@@ -390,6 +413,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     func removeAllServices(_ resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
         manager.removeAllServices()
         serviceMap = Dictionary<String, CBMutableService>()
+        serviceDataMap = [:]
         resolve("remove success")
         
     }
