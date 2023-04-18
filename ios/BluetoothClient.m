@@ -44,7 +44,7 @@ RCT_EXTERN_METHOD(
                   reject: (RCTPromiseRejectBlock) reject
 )
 
-RCT_EXTERN_METHOD(setSendData: (NSString *) serviceUUID
+RCT_EXTERN_METHOD(setCharacteristicData: (NSString *) serviceUUID
                   charUUID: (NSString *) charUUID
                   data: (NSString *) data
                   resolve: (RCTPromiseResolveBlock) resolve

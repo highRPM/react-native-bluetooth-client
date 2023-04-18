@@ -271,7 +271,7 @@ Bluetooth를 검색하는 기기에서 BLE_LIB라는 이름으로 검색이 된�
 setName('BLE_LIB');
 ```
 
-### `setSendData`
+### `setCharacteristicData`
 
 Advertising 때 사용할 이름. Advertising 데이터는 31byte의 제한이 있고 등록된 서비스 및 특성에 따라 name으로 사용할 수 있는 영역의 크기가 달라지기 때문에 확인을 잘해보고 사용해야 한다.
 
@@ -286,7 +286,7 @@ data(string) → Base64 형식의 데이터
 **Examples**
 
 ```jsx
-setSendData(
+setCharacteristicData(
   '0000XXXX-0000-1000-8000-00805f9b34fb',
   '0000XXXX-0000-1000-8000-00805f9b34fb',
   'SGVsbG8gV29ybGQ=' // "Hello World"

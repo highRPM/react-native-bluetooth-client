@@ -426,11 +426,12 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setSendData(String serviceUUID, String charUUID, String data, Promise promise) {
+    public void setCharacteristicData(String serviceUUID, String charUUID, String data, Promise promise) {
         try {
+            byte[] value = Base64.decode(data, Base64.DEFAULT);
             BluetoothGattService service = this.servicesMap.get(serviceUUID);
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charUUID));
-            characteristic.setValue(Base64.decode(data, Base64.DEFAULT));
+            characteristic.setValue(value);
             promise.resolve("set success");
         } catch (Exception e){
             promise.reject("fail", e);

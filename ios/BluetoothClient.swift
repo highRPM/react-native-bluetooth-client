@@ -374,7 +374,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     }
     
     @objc
-    func setSendData(_ serviceUUID: String, charUUID: String, data: String, resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
+    func setCharacteristicData(_ serviceUUID: String, charUUID: String, data: String, resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
         if let service = serviceMap[serviceUUID],
                char = getCharateristicService(service, charUUID),
                decodedData = Data(base64Encoded: data)
