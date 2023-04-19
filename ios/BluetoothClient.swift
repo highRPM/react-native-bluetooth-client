@@ -181,7 +181,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     }
     
     @objc
-    func startAdvertising(_ time: Int, resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void{
+    func startAdvertising(_ time: Int, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void{
         
         if(manager.state != .poweredOn){
             alertJS("Bluetooth off")

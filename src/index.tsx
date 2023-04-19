@@ -17,6 +17,14 @@ const BluetoothClient = NativeModules.BluetoothClient
       }
     );
 
+export interface AdvertiseSetting {
+    connectable: boolean;
+    txPower: number;
+    mode: number;
+    includeName: boolean;
+    includeTxPower: boolean;
+}
+
 export function checkBluetooth(): Promise<string> {
   return BluetoothClient.checkBluetooth();
 }
@@ -25,8 +33,8 @@ export function enableBluetooth() {
   return BluetoothClient.enableBluetooth();
 }
 
-export function startAdvertising(t: number): Promise<string> {
-  return BluetoothClient.startAdvertising(t);
+export function startAdvertising(t: number, options?: AdvertiseSetting): Promise<string> {
+  return BluetoothClient.startAdvertising(t, options);
 }
 
 export function stopAdvertising(): Promise<string> {

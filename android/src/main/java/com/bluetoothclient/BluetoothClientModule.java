@@ -39,6 +39,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -63,6 +64,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private Intent enableBtIntent;
     private Runnable timeoutRunnable;
     private long TIMEOUT = 0;
+    private bool INCLUDE_NAME = true;
+    private bool INCLUDE_TX_POWER = true;
+    private bool CONNECTABLE = true;
+    private int ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+    private int TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
     HashMap<ParcelUuid, byte[]> advertiseServices;
@@ -120,9 +126,29 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void startAdvertising(int t ,Promise promise) {
+    public void startAdvertising(int t, ReadableMap options, Promise promise) {
         int timeout = t;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (options && options.hasKey("connectable"))
+            CONNECTABLE = options.getBoolean("connectable");
+        else
+            CONNECTABLE = true;
+        if (options && options.hasKey("includeName"))
+            INCLUDE_NAME = options.getBoolean("includeName");
+        else
+            INCLUDE_NAME = true;
+        if (options && options.hasKey("mode"))
+            ADV_MODE = options.getInt("mode");
+        else
+            ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+        if (options && options.hasKey("txPower"))
+            TX_POWER = options.getInt("txPower");
+        else
+            TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
+        if (options && options.hasKey("includeTxPower"))
+            INCLUDE_TX_POWER = options.getBoolean("includeTxPower");
+        else
+            INCLUDE_TX_POWER = true;
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
             Log.d(TAG, "advertiser not null");
@@ -158,7 +184,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                             AdvertiseSettings settings = buildAdvertiseSettings();
                             AdvertiseData data = buildAdvertiseData();
                             AdvertiseData scanRes = new AdvertiseData.Builder()
-                                .setIncludeDeviceName(true)
+                                .setIncludeDeviceName(INCLUDE_NAME)
                                 .build();
                             mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
@@ -185,7 +211,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 AdvertiseSettings settings = buildAdvertiseSettings();
                 AdvertiseData data = buildAdvertiseData();
                 AdvertiseData scanRes = new AdvertiseData.Builder()
-                    .setIncludeDeviceName(true)
+                    .setIncludeDeviceName(INCLUDE_NAME)
                     .build();
                 mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
@@ -237,9 +263,10 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+        settingsBuilder.setAdvertiseMode(ADV_MODE);
         settingsBuilder.setTimeout((int) TimeUnit.MILLISECONDS.convert(TIMEOUT, TimeUnit.MINUTES));
-        settingsBuilder.setConnectable(true);
+        settingsBuilder.setConnectable(CONNECTABLE);
+        settingsBuilder.setTxPowerLevel(TX_POWER);
         return settingsBuilder.build();
     }
 
@@ -257,7 +284,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
          */
 
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-        dataBuilder.setIncludeDeviceName(true);
+        dataBuilder.setIncludeDeviceName(INCLUDE_NAME);
+        dataBuilder.setIncludeTxPowerLevel(INCLUDE_TX_POWER);
 
         for (Map.Entry<ParcelUuid, byte[]> pair: this.advertiseServices.entrySet()) {
             dataBuilder.addServiceUuid(pair.getKey());
@@ -464,10 +492,12 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void removeAllServices(Promise promise){
         try{
-            for (BluetoothGattService service : this.servicesMap.values()) {
-                mGattServer.removeService(service);
+            if (mGattServer) {
+                for (BluetoothGattService service : this.servicesMap.values()) {
+                    mGattServer.removeService(service);
+                }
+                mGattServer.clearServices();
             }
-            mGattServer.clearServices();
             this.servicesMap = new HashMap<String, BluetoothGattService>();
             this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
             promise.resolve("remove success");

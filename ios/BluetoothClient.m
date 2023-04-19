@@ -30,6 +30,7 @@ RCT_EXTERN_METHOD(
 )
 RCT_EXTERN_METHOD(
     startAdvertising:(NSInteger *)time
+    options : (NSDictionary *)options
     resolve :   (RCTPromiseResolveBlock)resolve
     rejecter:   (RCTPromiseRejectBlock)reject
 )
