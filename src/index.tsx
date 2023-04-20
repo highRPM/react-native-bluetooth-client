@@ -21,7 +21,7 @@ export interface AdvertiseSetting {
     connectable: boolean;
     txPower: number;
     mode: number;
-    includeName: boolean;
+    includeDeviceName: boolean;
     includeTxPower: boolean;
 }
 

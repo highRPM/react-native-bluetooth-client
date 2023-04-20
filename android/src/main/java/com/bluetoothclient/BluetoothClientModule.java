@@ -64,9 +64,9 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private Intent enableBtIntent;
     private Runnable timeoutRunnable;
     private long TIMEOUT = 0;
-    private bool INCLUDE_NAME = true;
-    private bool INCLUDE_TX_POWER = true;
-    private bool CONNECTABLE = true;
+    private Boolean INCLUDE_NAME = true;
+    private Boolean INCLUDE_TX_POWER = true;
+    private Boolean CONNECTABLE = true;
     private int ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     private int TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
     private AdvertiseCallback mAdvertiseCallback;
@@ -129,23 +129,23 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void startAdvertising(int t, ReadableMap options, Promise promise) {
         int timeout = t;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (options && options.hasKey("connectable"))
+        if (options != null && options.hasKey("connectable"))
             CONNECTABLE = options.getBoolean("connectable");
         else
             CONNECTABLE = true;
-        if (options && options.hasKey("includeName"))
-            INCLUDE_NAME = options.getBoolean("includeName");
+        if (options != null && options.hasKey("includeDeviceName"))
+            INCLUDE_NAME = options.getBoolean("includeDeviceName");
         else
             INCLUDE_NAME = true;
-        if (options && options.hasKey("mode"))
+        if (options != null && options.hasKey("mode"))
             ADV_MODE = options.getInt("mode");
         else
             ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
-        if (options && options.hasKey("txPower"))
+        if (options != null && options.hasKey("txPower"))
             TX_POWER = options.getInt("txPower");
         else
             TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
-        if (options && options.hasKey("includeTxPower"))
+        if (options != null && options.hasKey("includeTxPower"))
             INCLUDE_TX_POWER = options.getBoolean("includeTxPower");
         else
             INCLUDE_TX_POWER = true;
@@ -492,7 +492,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void removeAllServices(Promise promise){
         try{
-            if (mGattServer) {
+            if (mGattServer != null) {
                 for (BluetoothGattService service : this.servicesMap.values()) {
                     mGattServer.removeService(service);
                 }
