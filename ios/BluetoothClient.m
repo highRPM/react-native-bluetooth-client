@@ -22,7 +22,7 @@ RCT_EXTERN_METHOD(
     primary:    (BOOL)primary
 )
 RCT_EXTERN_METHOD(
-    addCharacteristicToService:serviceUUID
+    addCharacteristicToService: (NSString *)serviceUUID
     uuid:                       (NSString *)uuid
     permissions:                (NSInteger *)permissions
     properties:                 (NSInteger *)properties
