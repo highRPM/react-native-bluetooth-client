@@ -129,23 +129,23 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void startAdvertising(int t, ReadableMap options, Promise promise) {
         int timeout = t;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (options != null && options.hasKey("connectable"))
+        if (options.hasKey("connectable"))
             CONNECTABLE = options.getBoolean("connectable");
         else
             CONNECTABLE = true;
-        if (options != null && options.hasKey("includeDeviceName"))
+        if (options.hasKey("includeDeviceName"))
             INCLUDE_NAME = options.getBoolean("includeDeviceName");
         else
             INCLUDE_NAME = true;
-        if (options != null && options.hasKey("mode"))
+        if (options.hasKey("mode"))
             ADV_MODE = options.getInt("mode");
         else
             ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
-        if (options != null && options.hasKey("txPower"))
+        if (options.hasKey("txPower"))
             TX_POWER = options.getInt("txPower");
         else
             TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
-        if (options != null && options.hasKey("includeTxPower"))
+        if (options.hasKey("includeTxPower"))
             INCLUDE_TX_POWER = options.getBoolean("includeTxPower");
         else
             INCLUDE_TX_POWER = true;

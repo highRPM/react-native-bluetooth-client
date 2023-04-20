@@ -34,7 +34,7 @@ export function enableBluetooth() {
 }
 
 export function startAdvertising(t: number, options?: AdvertiseSetting): Promise<string> {
-  return BluetoothClient.startAdvertising(t, options);
+  return BluetoothClient.startAdvertising(t, options ?? {});
 }
 
 export function stopAdvertising(): Promise<string> {
