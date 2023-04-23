@@ -235,12 +235,12 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    func onReceiveData(serviceUUID: UUID, charUUID: UUID, data: String?, device: UUID){
+    func onReceiveData(serviceUUID: CBUUID?, charUUID: CBUUID, data: String?, device: UUID){
         
         if(hasListeners){
             let dataDic: [String : Any] = [
                 "data": data,
-                "serviceUUID": serviceUUID.uuidString,
+                "serviceUUID": serviceUUID?.uuidString,
                 "charUUID": charUUID.uuidString,
                 "device": device.uuidString
             ]
@@ -286,7 +286,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         let charateristic = getCharacteristic(request.characteristic.uuid)
         
         if(charateristic != nil){
-            request.value = charateristic.value
+            request.value = charateristic!.value
             
             manager.respond(to: request, withResult: .success)
         }else{
@@ -311,7 +311,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
                 char.value = request.value
                 let val: Data? = request.value
                 onReceiveData(
-                    serviceUUID: request.characteristic.service.uuid,
+                    serviceUUID: request.characteristic.service?.uuid,
                     charUUID: request.characteristic.uuid,
                     data: val?.base64EncodedString(),
                     device: request.central.identifier
@@ -381,10 +381,10 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     @objc
     func setCharacteristicData(_ serviceUUID: String, charUUID: String, data: String, resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
         if let service = serviceMap[serviceUUID],
-               char = getCharateristicService(service, charUUID),
-               decodedData = Data(base64Encoded: data)
+           let char = getCharateristicService(service, charUUID),
+           let decodedData = Data(base64Encoded: data)
         {
-            char.value = decodedData
+            (char as! CBMutableCharacteristic).value = decodedData
             resolve("set success")
         } else {
             reject("fail", "set fail", nil)
