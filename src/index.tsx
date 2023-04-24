@@ -17,12 +17,41 @@ const BluetoothClient = NativeModules.BluetoothClient
       }
     );
 
+export enum TxPower {
+  ULTRA_LOW = 0,
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+}
+
+export enum AdvertiseMode {
+  LOW_LATENCY = 0,
+  LOW_POWER = 1,
+  BALANCED = 2,
+}
+
 export interface AdvertiseSetting {
-    connectable: boolean;
-    txPower: number;
-    mode: number;
-    includeDeviceName: boolean;
-    includeTxPower: boolean;
+  connectable: boolean;
+  txPower: TxPower;
+  mode: AdvertiseMode;
+  includeDeviceName: boolean;
+  includeTxPower: boolean;
+}
+
+export enum Permission {
+  READABLE = 1,
+  READ_ENCRYPTED = 2,
+  WRITEABLE = 4,
+  WRITE_ENCRYPTED = 8,
+}
+
+export enum Property {
+  READ = 1,
+  WRITE = 2,
+  NOTIFY = 4,
+  INDICATE = 8,
+  SIGNED_WRITE = 16,
+  EXTENDED_PROPS = 128,
 }
 
 export function checkBluetooth(): Promise<string> {
@@ -33,7 +62,10 @@ export function enableBluetooth() {
   return BluetoothClient.enableBluetooth();
 }
 
-export function startAdvertising(t: number, options?: AdvertiseSetting): Promise<string> {
+export function startAdvertising(
+  t: number,
+  options?: AdvertiseSetting
+): Promise<string> {
   return BluetoothClient.startAdvertising(t, options ?? {});
 }
 
@@ -52,8 +84,8 @@ export function addService(uuid: string, primary: boolean): string {
 export function addCharacteristicToService(
   serviceUUID: string,
   uuid: string,
-  permissions: number,
-  properties: number,
+  permissions: Permission,
+  properties: Property,
   data: string
 ): string {
   return BluetoothClient.addCharacteristicToService(
