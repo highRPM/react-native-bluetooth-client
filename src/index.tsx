@@ -46,11 +46,13 @@ export enum Permission {
 }
 
 export enum Property {
-  READ = 1,
-  WRITE = 2,
-  NOTIFY = 4,
-  INDICATE = 8,
-  SIGNED_WRITE = 16,
+  BROADCAST = 1,
+  READ = 2,
+  WRITE_NO_RESPONSE = 4,
+  WRITE = 8,
+  NOTIFY = 16,
+  INDICATE = 32,
+  SIGNED_WRITE = 64,
   EXTENDED_PROPS = 128,
 }
 
