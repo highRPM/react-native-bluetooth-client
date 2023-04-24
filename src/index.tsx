@@ -31,11 +31,13 @@ export enum AdvertiseMode {
 }
 
 export interface AdvertiseSetting {
-  connectable: boolean;
-  txPower: TxPower;
-  mode: AdvertiseMode;
-  includeDeviceName: boolean;
-  includeTxPower: boolean;
+  connectable?: boolean;
+  txPower?: TxPower;
+  mode?: AdvertiseMode;
+  includeDeviceName?: boolean;
+  includeTxPower?: boolean;
+  manufacturerId?: number;
+  manufacturerData?: string;
 }
 
 export enum Permission {

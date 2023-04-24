@@ -69,6 +69,8 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private Boolean CONNECTABLE = true;
     private int ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     private int TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
+    private Integer MANUFACTURER_ID = null;
+    private byte[] MANUFACTURER_DATA = null;
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
     HashMap<ParcelUuid, byte[]> advertiseServices;
@@ -149,6 +151,14 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
             INCLUDE_TX_POWER = options.getBoolean("includeTxPower");
         else
             INCLUDE_TX_POWER = true;
+        if (options.hasKey("manufacturerId"))
+            MANUFACTURER_ID = options.getInt("manufacturerId");
+        else
+            MANUFACTURER_ID = null;
+        if (options.hasKey("manufacturerData"))
+            MANUFACTURER_DATA = Base64.decode(options.getString("manufacturerData"), Base64.DEFAULT);
+        else
+            MANUFACTURER_DATA = null;
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
             Log.d(TAG, "advertiser not null");
@@ -284,6 +294,10 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
          */
 
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
+
+        if (MANUFACTURER_ID != null)
+            dataBuilder.addManufacturerData(MANUFACTURER_ID, MANUFACTURER_DATA);
+
         dataBuilder.setIncludeDeviceName(INCLUDE_NAME);
         dataBuilder.setIncludeTxPowerLevel(INCLUDE_TX_POWER);
 
