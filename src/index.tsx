@@ -17,8 +17,45 @@ const BluetoothClient = NativeModules.BluetoothClient
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return BluetoothClient.multiply(a, b);
+export enum TxPower {
+  ULTRA_LOW = 0,
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+}
+
+export enum AdvertiseMode {
+  LOW_LATENCY = 0,
+  LOW_POWER = 1,
+  BALANCED = 2,
+}
+
+export interface AdvertiseSetting {
+  connectable?: boolean;
+  txPower?: TxPower;
+  mode?: AdvertiseMode;
+  includeDeviceName?: boolean;
+  includeTxPower?: boolean;
+  manufacturerId?: number;
+  manufacturerData?: string;
+}
+
+export enum Permission {
+  READABLE = 1,
+  READ_ENCRYPTED = 2,
+  WRITEABLE = 4,
+  WRITE_ENCRYPTED = 8,
+}
+
+export enum Property {
+  BROADCAST = 1,
+  READ = 2,
+  WRITE_NO_RESPONSE = 4,
+  WRITE = 8,
+  NOTIFY = 16,
+  INDICATE = 32,
+  SIGNED_WRITE = 64,
+  EXTENDED_PROPS = 128,
 }
 
 export function checkBluetooth(): Promise<string> {
@@ -29,12 +66,19 @@ export function enableBluetooth() {
   return BluetoothClient.enableBluetooth();
 }
 
-export function startAdvertising(t: number): Promise<string> {
-  return BluetoothClient.startAdvertising(t);
+export function startAdvertising(
+  t: number,
+  options?: AdvertiseSetting
+): Promise<string> {
+  return BluetoothClient.startAdvertising(t, options ?? {});
 }
 
 export function stopAdvertising(): Promise<string> {
   return BluetoothClient.stopAdvertising();
+}
+
+export function addAdvertiseService(uuid: string, serviceData: string): string {
+  return BluetoothClient.addAdvertiseService(uuid, serviceData);
 }
 
 export function addService(uuid: string, primary: boolean): string {
@@ -44,8 +88,8 @@ export function addService(uuid: string, primary: boolean): string {
 export function addCharacteristicToService(
   serviceUUID: string,
   uuid: string,
-  permissions: number,
-  properties: number,
+  permissions: Permission,
+  properties: Property,
   data: string
 ): string {
   return BluetoothClient.addCharacteristicToService(
@@ -69,8 +113,12 @@ export function sendNotificationToDevice(
   );
 }
 
-export function setSendData(data: string) {
-  return BluetoothClient.setSendData(data);
+export function setCharacteristicData(
+  serviceUUID: string,
+  charUUID: string,
+  data: string
+): Promise<string> {
+  return BluetoothClient.setCharacteristicData(serviceUUID, charUUID, data);
 }
 
 export function removeAllServices() {

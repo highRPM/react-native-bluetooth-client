@@ -25,6 +25,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.provider.SyncStateContract;
 import android.util.Log;
+import android.util.Base64;
+import android.os.ParcelUuid;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -37,6 +39,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -46,6 +49,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 @ReactModule(name = BluetoothClientModule.NAME)
 public class BluetoothClientModule extends ReactContextBaseJavaModule {
@@ -60,11 +64,18 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     private Intent enableBtIntent;
     private Runnable timeoutRunnable;
     private long TIMEOUT = 0;
+    private Boolean INCLUDE_NAME = true;
+    private Boolean INCLUDE_TX_POWER = true;
+    private Boolean CONNECTABLE = true;
+    private int ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+    private int TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
+    private Integer MANUFACTURER_ID = null;
+    private byte[] MANUFACTURER_DATA = null;
     private AdvertiseCallback mAdvertiseCallback;
     HashMap<String, BluetoothGattService> servicesMap;
+    HashMap<ParcelUuid, byte[]> advertiseServices;
     HashSet<BluetoothDevice> mBluetoothDevices;
     BluetoothGattServer mGattServer;
-    private String sendData = "";
     private String name = "RnBLE";
     private BluetoothGatt mBluetoothGatt;
 
@@ -72,6 +83,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.servicesMap = new HashMap<String, BluetoothGattService>();
+        this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
     }
 
     @Override
@@ -85,14 +97,6 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         Log.d(TAG, "set name = " + name);
         this.name = name;
     }
-
-    // Example method
-    // See https://reactnative.dev/docs/native-modules-android
-    @ReactMethod
-    public void multiply(double a, double b, Promise promise) {
-        promise.resolve(a * b);
-    }
-
 
     /**
      * 블루투스를 지원하는 기기인지 확인하는 메소드
@@ -124,9 +128,37 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void startAdvertising(int t ,Promise promise) {
+    public void startAdvertising(int t, ReadableMap options, Promise promise) {
         int timeout = t;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (options.hasKey("connectable"))
+            CONNECTABLE = options.getBoolean("connectable");
+        else
+            CONNECTABLE = true;
+        if (options.hasKey("includeDeviceName"))
+            INCLUDE_NAME = options.getBoolean("includeDeviceName");
+        else
+            INCLUDE_NAME = true;
+        if (options.hasKey("mode"))
+            ADV_MODE = options.getInt("mode");
+        else
+            ADV_MODE = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
+        if (options.hasKey("txPower"))
+            TX_POWER = options.getInt("txPower");
+        else
+            TX_POWER = AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM;
+        if (options.hasKey("includeTxPower"))
+            INCLUDE_TX_POWER = options.getBoolean("includeTxPower");
+        else
+            INCLUDE_TX_POWER = true;
+        if (options.hasKey("manufacturerId"))
+            MANUFACTURER_ID = options.getInt("manufacturerId");
+        else
+            MANUFACTURER_ID = null;
+        if (options.hasKey("manufacturerData"))
+            MANUFACTURER_DATA = Base64.decode(options.getString("manufacturerData"), Base64.DEFAULT);
+        else
+            MANUFACTURER_DATA = null;
         Log.d(TAG, "ad start");
         if (mBluetoothLeAdvertiser == null) {
             Log.d(TAG, "advertiser not null");
@@ -162,7 +194,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                             AdvertiseSettings settings = buildAdvertiseSettings();
                             AdvertiseData data = buildAdvertiseData();
                             AdvertiseData scanRes = new AdvertiseData.Builder()
-                                .setIncludeDeviceName(true)
+                                .setIncludeDeviceName(INCLUDE_NAME)
                                 .build();
                             mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
@@ -189,7 +221,7 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 AdvertiseSettings settings = buildAdvertiseSettings();
                 AdvertiseData data = buildAdvertiseData();
                 AdvertiseData scanRes = new AdvertiseData.Builder()
-                    .setIncludeDeviceName(true)
+                    .setIncludeDeviceName(INCLUDE_NAME)
                     .build();
                 mAdvertiseCallback = new SampleAdvertiseCallback(promise);
 
@@ -241,9 +273,10 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
      */
     private AdvertiseSettings buildAdvertiseSettings() {
         AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+        settingsBuilder.setAdvertiseMode(ADV_MODE);
         settingsBuilder.setTimeout((int) TimeUnit.MILLISECONDS.convert(TIMEOUT, TimeUnit.MINUTES));
-        settingsBuilder.setConnectable(true);
+        settingsBuilder.setConnectable(CONNECTABLE);
+        settingsBuilder.setTxPowerLevel(TX_POWER);
         return settingsBuilder.build();
     }
 
@@ -261,8 +294,18 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
          */
 
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-        dataBuilder.addServiceUuid(Constants.Service_UUID);
-        dataBuilder.setIncludeDeviceName(true);
+
+        if (MANUFACTURER_ID != null)
+            dataBuilder.addManufacturerData(MANUFACTURER_ID, MANUFACTURER_DATA);
+
+        dataBuilder.setIncludeDeviceName(INCLUDE_NAME);
+        dataBuilder.setIncludeTxPowerLevel(INCLUDE_TX_POWER);
+
+        for (Map.Entry<ParcelUuid, byte[]> pair: this.advertiseServices.entrySet()) {
+            dataBuilder.addServiceUuid(pair.getKey());
+            dataBuilder.addServiceData(pair.getKey(), pair.getValue());
+        }
+
 
         /* For example - this will cause advertising to fail (exceeds size limit) */
 //        String failureData = "1";
@@ -327,13 +370,27 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void addAdvertiseService(String uuid, String serviceData, Promise promise) {
+        try {
+            ParcelUuid serviceUuid = ParcelUuid.fromString(uuid);
+            if (!this.advertiseServices.containsKey(serviceUuid)) {
+                byte[] data = serviceData != null ? Base64.decode(serviceData, Base64.DEFAULT) : new byte[0];
+                this.advertiseServices.put(serviceUuid, data);
+            }
+            promise.resolve("ok");
+        } catch (Exception e) {
+            promise.reject("error", e);
+        }
+    }
+
+    @ReactMethod
     public void addService(String uuid, boolean primary) {
         UUID SERVICE_UUID = UUID.fromString(uuid);
 //        int type = BluetoothGattService.SERVICE_TYPE_PRIMARY;
         int type = primary == true ? 0 : 1;
         BluetoothGattService tempService = new BluetoothGattService(SERVICE_UUID, type);
         Log.d(TAG, tempService.getCharacteristics().toString());
-        Log.d(TAG,  tempService.getIncludedServices().toString());
+        Log.d(TAG, tempService.getIncludedServices().toString());
         if (!this.servicesMap.containsKey(uuid))
             this.servicesMap.put(uuid, tempService);
     }
@@ -369,17 +426,12 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset,
                                                 BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, "데이터를 요청?");
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-            if (offset != 0) {
-
-                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_INVALID_OFFSET, offset,
-                    /* value (optional) */ "hi".getBytes(StandardCharsets.UTF_8));
-                return;
+            if (offset > characteristic.getValue().length) {
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_INVALID_OFFSET, 0, null);
+            } else {
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, characteristic.getValue());
             }
-            characteristic.setValue(sendData.getBytes(StandardCharsets.UTF_8));
-            mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS,
-                offset, characteristic.getValue());
         }
 
         @Override
@@ -401,11 +453,12 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 data.pushInt((int) b);
             }
             map.putArray("data", data);
+            map.putString("serviceUUID", characteristic.getService().getUuid().toString());
+            map.putString("charUUID", characteristic.getUuid().toString());
             map.putString("device", device.toString());
             Log.d(TAG, "데이터는 ~~~~~~~~");
             Log.d(TAG, map.toString());
             if (responseNeeded) {
-
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
                 getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit("onReceiveData", map);
@@ -418,12 +471,11 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
     public void sendNotificationToDevice(String serviceUUID, String charUUID, String message, Promise promise){
         Log.d(TAG, "데이터는 ~~~~~~~~");
         Log.d(TAG, serviceUUID+"/"+charUUID+"/"+ message);
-        byte[] decoded = message.getBytes(StandardCharsets.UTF_8);
 
         try{
             // 서비스 uuid를 가지고 특성 uuid를 꺼내오는 과정
             BluetoothGattCharacteristic characteristic = servicesMap.get(serviceUUID).getCharacteristic(UUID.fromString(charUUID));
-            characteristic.setValue(decoded);
+            characteristic.setValue(Base64.decode(message, Base64.DEFAULT));
             boolean indicate = (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) == BluetoothGattCharacteristic.PROPERTY_INDICATE;
 
             for(BluetoothDevice device : mBluetoothDevices){
@@ -431,29 +483,40 @@ public class BluetoothClientModule extends ReactContextBaseJavaModule {
                 Log.d(TAG, "device = "+device);
             }
             promise.resolve("Send Notification Success");
-        }catch (Exception e){
-            promise.reject("fail", "Send Notification Fail");
+        } catch (Exception e) {
+            promise.reject("fail", e);
         }
 
     }
 
     @ReactMethod
-    public void setSendData(String data){
-        this.sendData = data;
+    public void setCharacteristicData(String serviceUUID, String charUUID, String data, Promise promise) {
+        try {
+            byte[] value = Base64.decode(data, Base64.DEFAULT);
+            BluetoothGattService service = this.servicesMap.get(serviceUUID);
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charUUID));
+            characteristic.setValue(value);
+            promise.resolve("set success");
+        } catch (Exception e){
+            promise.reject("fail", e);
+        }
     }
 
     @SuppressLint("MissingPermission")
     @ReactMethod
     public void removeAllServices(Promise promise){
         try{
-            for (BluetoothGattService service : this.servicesMap.values()) {
-                mGattServer.removeService(service);
+            if (mGattServer != null) {
+                for (BluetoothGattService service : this.servicesMap.values()) {
+                    mGattServer.removeService(service);
+                }
+                mGattServer.clearServices();
             }
-            mGattServer.clearServices();
             this.servicesMap = new HashMap<String, BluetoothGattService>();
+            this.advertiseServices = new HashMap<ParcelUuid, byte[]>();
             promise.resolve("remove success");
-        }catch (Exception e){
-            promise.reject("remove fail");
+        } catch (Exception e){
+            promise.reject("remove fail", e);
         }
     }
 

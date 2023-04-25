@@ -11,7 +11,6 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     var manager: CBPeripheralManager!
     var startPromiseResolve: RCTPromiseResolveBlock?
     var startPromiseReject: RCTPromiseRejectBlock?
-    var sendData: String = ""
     var notiDevices = Array<CBCentral>()
     var blState: Any = ""
     override init(){
@@ -76,10 +75,15 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         resolve(advertising)
     
     }
+
+    // BLE 서비스를 등록하는 함수
+    @objc(addAdvertiseService:serviceData:)
+    func addAdvertiseService(_ uuid: String, serviceData: String) {
+    }
       
     // BLE 서비스를 등록하는 함수
     @objc(addService:primary:)
-    func addService(_ uuid: String, primary: Bool){
+    func addService(_ uuid: String, primary: Bool) {
         let serviceUUID = CBUUID(string: uuid) // Corebluetooth의 UUID를 만드는 함수 Base UUID가 미리 채워진 상태로 만들어진다.
         print("serviceUUID \(serviceUUID)")
         let service = CBMutableService(type: serviceUUID, primary: primary) // 서비스를 로컬 데이터베이스에 추가하고 서비스가 게시되면 더 이상 변경할 수 없다.
@@ -146,7 +150,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         print(CBAttributePermissions.writeable)
         let charateristic = CBMutableCharacteristic(type: charateristicUUID, properties: propertiesValue, value: nil, permissions: permissionVlaue)
         print("추가한 캐릭터는 \(charateristic) ")
-        if(manager.state == .poweredOn){
+        if (manager.state == .poweredOn) {
             if(serviceMap[serviceUUID] != nil){
                 
                 serviceMap[serviceUUID]?.characteristics?.append(charateristic) // 파라미터로 받은 serivceUUID의 아래에 특성 값을 입력해준다.
@@ -162,17 +166,8 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    
-    
-    
-    
-  @objc(multiply:withB:withResolver:withRejecter:)
-  func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-    resolve(a*b)
-  }
-    
     @objc
-    func startAdvertising(_ time: Int, resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void{
+    func startAdvertising(_ time: Int, options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void{
         
         if(manager.state != .poweredOn){
             alertJS("Bluetooth off")
@@ -187,7 +182,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         
         let advertisementData = [
             CBAdvertisementDataLocalNameKey: name, //블루투스 검색시 나오게 될 이름
-            CBAdvertisementDataServiceUUIDsKey: getServiceUUIDArray()
+            CBAdvertisementDataServiceUUIDsKey: getServiceUUIDArray(),
         ] as [String : Any] // 안에 데이터와 함께 초기화를 시켜줌
         print(advertisementData)
         manager.startAdvertising(advertisementData)
@@ -213,7 +208,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
             }else{
                 let char = charateristic as! CBMutableCharacteristic
                 print(char.subscribedCentrals)
-                char.value = data.data(using: .utf8) ?? Data()
+                char.value = Data(base64Encoded: data) ?? Data()
                 print(data.count)
                 
                 //onSubscribedCentrals 여기에 Central 객체를 넣어주면 해당 Central에게만 알림이 가게된다.
@@ -240,11 +235,15 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         }
     }
     
-    func onReceiveData(_ data:String, device: UUID){
+    func onReceiveData(serviceUUID: CBUUID?, charUUID: CBUUID, data: String?, device: UUID){
         
         if(hasListeners){
-            let buf: [UInt8] = Array(data.utf8)
-            let dataDic = ["data":buf, "device":device.uuidString] as [String : Any]
+            let dataDic: [String : Any] = [
+                "data": data,
+                "serviceUUID": serviceUUID?.uuidString,
+                "charUUID": charUUID.uuidString,
+                "device": device.uuidString
+            ]
             print(dataDic)
             sendEvent(withName: "onReceiveData", body: dataDic)
             
@@ -258,7 +257,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     func getServiceUUIDArray() -> Array<CBUUID>{
         
         var serviceArray = [CBUUID]() // 배열 선언 및 초기화 CBUUID 타입으로 배열을 초기화 하고 선언한 것이다.
-        for(_, service) in serviceMap{ // "_" 를 사용하는 이유는 사용하지 않는 값을 생략하고 사용하기 위해서 선언한다. wildcard pattern 이라고한다.
+        for (_, service) in serviceMap { // "_" 를 사용하는 이유는 사용하지 않는 값을 생략하고 사용하기 위해서 선언한다. wildcard pattern 이라고한다.
             serviceArray.append(service.uuid)
         }
         return serviceArray
@@ -287,8 +286,7 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
         let charateristic = getCharacteristic(request.characteristic.uuid)
         
         if(charateristic != nil){
-//            charateristic?.value = self.sendData
-            request.value = sendData.data(using: .utf8)
+            request.value = charateristic!.value
             
             manager.respond(to: request, withResult: .success)
         }else{
@@ -312,7 +310,12 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
                 print(request.central.identifier)
                 char.value = request.value
                 let val: Data? = request.value
-                onReceiveData(String(decoding: val!, as: UTF8.self), device: request.central.identifier)
+                onReceiveData(
+                    serviceUUID: request.characteristic.service?.uuid,
+                    charUUID: request.characteristic.uuid,
+                    data: val?.base64EncodedString(),
+                    device: request.central.identifier
+                )
             }else{
                 alertJS("액세스 하려는 특성이 일치하지 않습니다.")
             }
@@ -376,9 +379,16 @@ class BluetoothClient: RCTEventEmitter, CBPeripheralManagerDelegate{
     }
     
     @objc
-    func setSendData(_ data: String){
-        
-        self.sendData = data
+    func setCharacteristicData(_ serviceUUID: String, charUUID: String, data: String, resolve:RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void{
+        if let service = serviceMap[serviceUUID],
+           let char = getCharateristicService(service, charUUID),
+           let decodedData = Data(base64Encoded: data)
+        {
+            (char as! CBMutableCharacteristic).value = decodedData
+            resolve("set success")
+        } else {
+            reject("fail", "set fail", nil)
+        }
     }
     
     @objc
